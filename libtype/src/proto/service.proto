@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "message/limit.proto";
+import "message/config.proto";
+
+package service;
+
+service Service {
+    // 限流
+    rpc Limit(limit.Req) returns (limit.Resp) {}
+    // 写入配置
+    rpc SetConfig(config.SetReq) returns (config.SetResp) {}
+    // 获取配置
+    rpc GetConfig(config.GetReq) returns (config.GetResp) {}
+}

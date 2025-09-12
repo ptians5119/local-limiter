@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package limit;
+
+message Req {
+  string app_name = 1;
+  optional int64 user_id = 2;
+  string api = 3;
+}
+
+message Resp {
+  bool is_ok = 1;
+  int32 count = 2;
+}
