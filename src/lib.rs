@@ -1,11 +1,16 @@
 mod local;
 
+static TOTAL_LIMIT: once_cell::sync::OnceCell<i32> = once_cell::sync::OnceCell::new();
+
+/// 初始化限流阈值
+pub fn init(limit: i32) {
+    TOTAL_LIMIT.set(limit).unwrap();
+}
+
 /// 限流
 pub async fn limit(user_id: i64, _api: impl ::std::convert::Into<::std::string::String>,) -> (bool, i32) {
-    let ceiling = 10;
-    
     let count = local::count_by_user(user_id).await;
-    // println!("Response: {:?}", r);
+    let ceiling = TOTAL_LIMIT.get().cloned().unwrap_or(50);
     (count < ceiling, count)
 }
 
