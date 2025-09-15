@@ -11,7 +11,7 @@ pub fn init(limit: i32) {
 pub async fn limit(key: impl ::std::convert::Into<::std::string::String>,) -> (bool, i32) {
     let count = local::count_by_key(key.into()).await;
     let ceiling = TOTAL_LIMIT.get().cloned().unwrap_or(50);
-    (count < ceiling, count)
+    (count < ceiling, ceiling - count)
 }
 
 #[cfg(test)]
