@@ -8,7 +8,7 @@ use std::time::Duration;
 pub static LOCAL_CACHE: Lazy<Mutex<Cache<String, i32>>> = Lazy::new(|| {
     let cache = Cache::builder()
         .time_to_live(Duration::from_secs(60))
-        .time_to_idle(Duration::from_secs(10))
+        .time_to_idle(Duration::from_secs(1))
         .max_capacity(10000)
         .build();
     Mutex::new(cache)
