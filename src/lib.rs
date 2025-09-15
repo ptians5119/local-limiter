@@ -18,11 +18,21 @@ mod tests {
     #[test]
     fn limit_test() {
         tokio::runtime::Runtime::new().unwrap().block_on(async {
-            for i in 0..15 {
-                let r = limit(123, "api".to_string()).await;
-                println!("{}: Response: {:?}", i, r);
-                tokio::time::sleep(Duration::from_millis(100)).await;
-            }
+            let th1 = tokio::spawn(async move {
+                for i in 0..15 {
+                    let r = limit(123, "api".to_string()).await;
+                    println!("1-{}: Response: {:?}", i, r);
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                }
+            });
+            let th2 = tokio::spawn(async move {
+                for i in 0..15 {
+                    let r = limit(123, "api".to_string()).await;
+                    println!("2-{}: Response: {:?}", i, r);
+                    tokio::time::sleep(Duration::from_millis(10)).await;
+                }
+            });
+            let _ = tokio::join!(th1, th2);
         });
     }
 
@@ -31,15 +41,15 @@ mod tests {
         println!("global_test");
         tokio::runtime::Runtime::new().unwrap().block_on(async {
             let key = "1231";
-            let cache = super::local::LOCAL_CACHE.entry(key.to_string()).or_insert(0).await;
+            let cache = super::local::LOCAL_CACHE.lock().await.entry(key.to_string()).or_insert(0).await;
             println!("{:?}", cache.value());
-            super::local::LOCAL_CACHE.insert(key.to_string(), cache.value() + 1).await;
+            super::local::LOCAL_CACHE.lock().await.insert(key.to_string(), cache.value() + 1).await;
             // tokio::time::sleep(Duration::from_secs(6)).await;
-            let cache = super::local::LOCAL_CACHE.entry(key.to_string()).or_insert(0).await;
+            let cache = super::local::LOCAL_CACHE.lock().await.entry(key.to_string()).or_insert(0).await;
             println!("{:?}", cache.value());
-            super::local::LOCAL_CACHE.insert(key.to_string(), cache.value() + 1).await;
+            super::local::LOCAL_CACHE.lock().await.insert(key.to_string(), cache.value() + 1).await;
             // tokio::time::sleep(Duration::from_secs(6)).await;
-            let cache = super::local::LOCAL_CACHE.entry(key.to_string()).or_insert(1).await;
+            let cache = super::local::LOCAL_CACHE.lock().await.entry(key.to_string()).or_insert(1).await;
             println!("{:?}", cache.value());
         });
     }
