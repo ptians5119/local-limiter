@@ -8,8 +8,8 @@ pub fn init(limit: i32) {
 }
 
 /// 限流
-pub async fn limit(user_id: i64, _api: impl ::std::convert::Into<::std::string::String>,) -> (bool, i32) {
-    let count = local::count_by_user(user_id).await;
+pub async fn limit(key: impl ::std::convert::Into<::std::string::String>,) -> (bool, i32) {
+    let count = local::count_by_key(key.into()).await;
     let ceiling = TOTAL_LIMIT.get().cloned().unwrap_or(50);
     (count < ceiling, count)
 }
@@ -25,14 +25,14 @@ mod tests {
         tokio::runtime::Runtime::new().unwrap().block_on(async {
             let th1 = tokio::spawn(async move {
                 for i in 0..15 {
-                    let r = limit(123, "api".to_string()).await;
+                    let r = limit(123.to_string()).await;
                     println!("1-{}: Response: {:?}", i, r);
                     tokio::time::sleep(Duration::from_millis(10)).await;
                 }
             });
             let th2 = tokio::spawn(async move {
                 for i in 0..15 {
-                    let r = limit(123, "api".to_string()).await;
+                    let r = limit(123.to_string()).await;
                     println!("2-{}: Response: {:?}", i, r);
                     tokio::time::sleep(Duration::from_millis(10)).await;
                 }
